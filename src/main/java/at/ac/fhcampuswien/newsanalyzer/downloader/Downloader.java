@@ -35,7 +35,7 @@ public abstract class Downloader {
                 os.write(b, 0, length);
             }
         } catch (IOException e) {
-            throw new DownloaderException("Error in Class Downloader, method saveUrl2File!" + e.getMessage());
+            throw new DownloaderException("Error in Class Downloader, method saveUrl2File!\n" + e.getMessage());
         } finally {
             try {
                 Objects.requireNonNull(is).close();

@@ -2,6 +2,8 @@ package at.ac.fhcampuswien.newsanalyzer.ui;
 
 
 import at.ac.fhcampuswien.newsanalyzer.ctrl.Controller;
+import at.ac.fhcampuswien.newsanalyzer.downloader.DownloaderException;
+import at.ac.fhcampuswien.newsanalyzer.downloader.SequentialDownloader;
 import at.ac.fhcampuswien.newsapi.beans.Article;
 import at.ac.fhcampuswien.newsapi.beans.NewsResponse;
 import at.ac.fhcampuswien.newsapi.enums.Category;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class UserInterface {
 
@@ -142,7 +145,7 @@ public class UserInterface {
 			menu.insert("b", "Alle News zu Sport in Österreich", this::getDataFromCtrl2);
 			menu.insert("c", "Die aktuellsten Nachrichten zu Business und Aktien in Österreich", this::getDataFromCtrl3);
 			menu.insert("d", "Eigene Eingabe",this::getDataForCustomInput);
-			menu.insert("e", "Letzte Suche herunterladen.",this::downloadController);
+			menu.insert("e", "Letzte Suche herunterladen.",this::downloadArticles);
 			menu.insert("q", "Programm Beenden", null);
 			Runnable choice;
 			while ((choice = menu.exec()) != null) {
@@ -154,9 +157,19 @@ public class UserInterface {
 		}
 	}
 
-	private void downloadController(){
-		ctrl.downloadArticles();
-
+	SequentialDownloader downloader = new SequentialDownloader();
+	public void downloadArticles(){
+		int count;
+		try{
+			count = downloader.process(
+					ctrl.getData().getArticles().
+							stream().map( Article::getUrl ).
+							collect( Collectors.toList() )
+			);
+			System.out.println(count + " Aritkel wurden heruntergeladen.");
+		} catch (DownloaderException e){
+			System.out.println(e.getMessage());
+		}
 	}
 
 	protected String readLine() {

@@ -113,21 +113,6 @@ public class Controller {
 	public NewsResponse getData() {
 		return newsResponse;
 	}
-
-	SequentialDownloader downloader = new SequentialDownloader();
-	public void downloadArticles(){
-		int count;
-		try{
-			count = downloader.process(
-					newsResponse.getArticles().
-							stream().map( Article::getUrl ).
-							collect( Collectors.toList() )
-			);
-			System.out.println(count + " Aritkel wurden heruntergeladen.");
-		} catch (DownloaderException e){
-			System.out.println(e.getMessage());
-		}
-	}
 }
 
 
