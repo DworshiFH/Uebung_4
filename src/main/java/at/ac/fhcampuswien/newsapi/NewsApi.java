@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.newsapi;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import at.ac.fhcampuswien.newsapi.beans.NewsResponse;
@@ -9,6 +10,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 
 public class NewsApi {
 
@@ -112,15 +114,17 @@ public class NewsApi {
         this.endpoint = endpoint;
     }
 
-    protected String requestData() {
+    protected String requestData() throws NewsApiException {
         String url = buildURL();
         System.out.println("URL: " + url);
         URL obj = null;
         try {
             obj = new URL(url);
         } catch (MalformedURLException e) {
-            // TODO improve ErrorHandling
+            throw new NewsApiException("Error: URL invalid or malformed.\n\n" + e.getMessage());
+        } catch (Exception e){
             e.printStackTrace();
+            throw new NewsApiException("General error in Class NewsApi, method requestData(), section URL\n\n" + e.getMessage());
         }
         HttpURLConnection con;
         StringBuilder response = new StringBuilder();
@@ -133,18 +137,21 @@ public class NewsApi {
             }
             in.close();
         } catch (IOException e) {
-            // TODO improve ErrorHandling
-            System.out.println("Error "+e.getMessage());
+            throw new NewsApiException("IOException in Class NewsApi, method requestData(), \n\n" + e.getMessage());
         }
         return response.toString();
     }
 
-    protected String buildURL() {
-        // TODO ErrorHandling
-        String urlbase = String.format(NEWS_API_URL,getEndpoint().getValue(),getQ(),getApiKey());
-        StringBuilder sb = new StringBuilder(urlbase);
+    protected String buildURL() throws NewsApiException {
+        if(NEWS_API_URL.equals("")) throw new NewsApiException("String NEWS_API_URL is not set!");
+        //if(getEndpoint() != Endpoint.EVERYTHING ^ getEndpoint() != Endpoint.TOP_HEADLINES) throw new NewsApiException("Endpoint is not set!");
+        if(getQ().equals("")) throw new NewsApiException("Keyword is not set!");
+        if(getApiKey().equals("")) throw new NewsApiException("API Key is not set!");
 
-        System.out.println(urlbase);
+        String urlBase = String.format(NEWS_API_URL,getEndpoint().getValue(),getQ(),getApiKey());
+        StringBuilder sb = new StringBuilder(urlBase);
+
+        System.out.println(urlBase);
 
         if(getFrom() != null){
             sb.append(DELIMITER).append("from=").append(getFrom());
@@ -182,23 +189,21 @@ public class NewsApi {
         return sb.toString();
     }
 
-    public NewsResponse getNews() {
-        NewsResponse newsReponse = null;
+    public NewsResponse getNews() throws NewsApiException {
+        NewsResponse newsResponse = null;
         String jsonResponse = requestData();
         if(jsonResponse != null && !jsonResponse.isEmpty()){
 
             ObjectMapper objectMapper = new ObjectMapper();
             try {
-                newsReponse = objectMapper.readValue(jsonResponse, NewsResponse.class);
-                if(!"ok".equals(newsReponse.getStatus())){
-                    System.out.println("Error: "+newsReponse.getStatus());
+                newsResponse = objectMapper.readValue(jsonResponse, NewsResponse.class);
+                if(!"ok".equals(newsResponse.getStatus())){
+                    System.out.println("Error: "+newsResponse.getStatus());
                 }
             } catch (JsonProcessingException e) {
-                System.out.println("Error: "+e.getMessage());
+                throw new NewsApiException("Error in Class NewsApi, method getNews()\n\n" + e.getMessage());
             }
         }
-        //TODO improve Errorhandling
-        return newsReponse;
+        return newsResponse;
     }
 }
-
