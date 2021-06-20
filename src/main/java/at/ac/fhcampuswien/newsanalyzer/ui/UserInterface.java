@@ -2,8 +2,6 @@ package at.ac.fhcampuswien.newsanalyzer.ui;
 
 
 import at.ac.fhcampuswien.newsanalyzer.ctrl.Controller;
-import at.ac.fhcampuswien.newsanalyzer.downloader.DownloaderException;
-import at.ac.fhcampuswien.newsanalyzer.downloader.SequentialDownloader;
 import at.ac.fhcampuswien.newsapi.beans.Article;
 import at.ac.fhcampuswien.newsapi.beans.NewsResponse;
 import at.ac.fhcampuswien.newsapi.enums.Category;
@@ -13,17 +11,19 @@ import at.ac.fhcampuswien.newsapi.enums.SortBy;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class UserInterface {
 
 	Scanner scanner = new Scanner(System.in);
 
 	private Controller ctrl = new Controller();
+
 	public void getDataFromCtrl1() {
-		ctrl.setKeyword("corona");
+		ctrl.setKeyword("virus");
 		ctrl.setCountry(Country.at);
 		ctrl.setCategory(Category.health);
 		ctrl.setSortBy(SortBy.RELEVANCY);
@@ -41,6 +41,7 @@ public class UserInterface {
 		ctrl.setKeyword("Sport");
 		ctrl.setCountry(Country.at);
 		ctrl.setCategory(Category.sports);
+		ctrl.setSortBy(SortBy.RELEVANCY);
 		ctrl.process();
 
 		NewsResponse newsResponse = ctrl.getData();
@@ -57,6 +58,7 @@ public class UserInterface {
 		ctrl.setKeyword("Aktien");
 		ctrl.setCountry(Country.at);
 		ctrl.setCategory(Category.business);
+		ctrl.setSortBy(SortBy.RELEVANCY);
 		ctrl.process();
 
 		NewsResponse newsResponse = ctrl.getData();
@@ -145,7 +147,9 @@ public class UserInterface {
 			menu.insert("b", "Alle News zu Sport in Österreich", this::getDataFromCtrl2);
 			menu.insert("c", "Die aktuellsten Nachrichten zu Business und Aktien in Österreich", this::getDataFromCtrl3);
 			menu.insert("d", "Eigene Eingabe",this::getDataForCustomInput);
-			menu.insert("e", "Letzte Suche herunterladen.",this::downloadArticles);
+			menu.insert("e", "Letzte Suche herunterladen. (sequentiell) ",this::downloadArticlesSequential);
+			menu.insert("f", "Letzte Suche herunterladen. (threaded) ",this::downloadArticlesThreaded);
+			menu.insert("g", "Downloadzeiten vergleichen ",this::calculateTimeDifference);
 			menu.insert("q", "Programm Beenden", null);
 			Runnable choice;
 			while ((choice = menu.exec()) != null) {
@@ -157,19 +161,34 @@ public class UserInterface {
 		}
 	}
 
-	SequentialDownloader downloader = new SequentialDownloader();
-	public void downloadArticles(){
-		int count;
-		try{
-			count = downloader.process(
-					ctrl.getData().getArticles().
-							stream().map( Article::getUrl ).
-							collect( Collectors.toList() )
-			);
-			System.out.println(count + " Aritkel wurden heruntergeladen.");
-		} catch (DownloaderException e){
-			System.out.println(e.getMessage());
+	private long seqProcTime=0;
+	public void downloadArticlesSequential(){
+		ctrl.downloadSequential();
+		seqProcTime = ctrl.getSeqDLTime();
+	}
+
+	private long thrProcTime=0;
+	public void downloadArticlesThreaded(){
+		ctrl.downloadThreaded();
+		thrProcTime = ctrl.getThrDLTime();
+	}
+
+	public void calculateTimeDifference(){
+		if(seqProcTime == 0 || thrProcTime == 0 ) System.out.println("Bitte beide Methoden zum Downloaden benutzen!");
+
+		DecimalFormat df4 = new DecimalFormat("#.####");
+		df4.setRoundingMode(RoundingMode.DOWN);
+
+		if(thrProcTime < seqProcTime){
+			float time = (float)seqProcTime/thrProcTime;
+			System.out.println("Die Downloadzeit mit Threads war " + df4.format(time) + " mal schneller");
+		} else {
+			float time = (float)thrProcTime/seqProcTime;
+			System.out.println("Die Downloadzeit ohne Threads war " + df4.format(time) + " mal schneller");
+
 		}
+
+
 	}
 
 	protected String readLine() {

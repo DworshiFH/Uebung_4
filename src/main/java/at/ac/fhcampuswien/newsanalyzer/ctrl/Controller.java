@@ -12,6 +12,7 @@ import at.ac.fhcampuswien.newsapi.enums.Endpoint;
 import at.ac.fhcampuswien.newsapi.enums.SortBy;
 import at.ac.fhcampuswien.newsanalyzer.downloader.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -110,8 +111,45 @@ public class Controller {
 		}
 	}
 
+	public List<String> getURLs(){
+		return newsResponse.getArticles().
+				stream().map( Article::getUrl ).
+				collect( Collectors.toList() );
+	}
+
 	public NewsResponse getData() {
 		return newsResponse;
+	}
+
+	private SequentialDownloader sequDownloader = new SequentialDownloader();
+
+	public void downloadSequential(){
+		int count;
+		try{
+			count = sequDownloader.process(getURLs());
+			System.out.println(count + " Aritkel wurden in " + sequDownloader.getDownloadTime() + " Nanosekunden heruntergeladen.");
+		} catch (DownloaderException e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	public long getSeqDLTime(){
+		return sequDownloader.getDownloadTime();
+	}
+
+	private ParallelDownloader parallelDownloader = new ParallelDownloader();
+	public void downloadThreaded(){
+		int count;
+		try{
+			count = parallelDownloader.process(getURLs());
+			System.out.println(count + " Aritkel wurden in " + parallelDownloader.getDownloadTime() + " Nanosekunden heruntergeladen.");
+		} catch (ExecutionException | InterruptedException e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	public long getThrDLTime(){
+		return parallelDownloader.getDownloadTime();
 	}
 }
 
