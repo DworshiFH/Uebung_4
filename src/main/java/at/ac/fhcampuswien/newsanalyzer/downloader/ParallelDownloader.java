@@ -15,11 +15,16 @@ public class ParallelDownloader extends Downloader{
     public int process(List<String> urls) throws ExecutionException, InterruptedException {
         long start = System.nanoTime();
         int count = 0;
+
         for(String url : urls) {
-            Future<String> future;
-            if(!url.equals("") && !url.equals("null")){
-                future = pool.submit( () -> saveUrl2File(url));
-                if(future.get() != null) count++;
+            try{
+                Future<String> future;
+                if(!url.equals("") && !url.equals("null")){
+                    future = pool.submit( () -> saveUrl2File(url));
+                    if(future.get() != null) count++;
+                }
+            }catch(NullPointerException e){
+                System.out.println(e.getMessage());;
             }
         }
         long end = System.nanoTime();

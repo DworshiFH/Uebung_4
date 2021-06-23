@@ -34,7 +34,7 @@ public class Controller {
 				.setApiKey(APIKEY)
 				.setQ(this.keyword) //				.setEndPoint(Endpoint.EVERYTHING)
 				.setEndPoint(Endpoint.TOP_HEADLINES)
-				.setFrom("2021-05-20")
+				.setFrom("2021-05-23")
 				.setSourceCountry(this.country)
 				.setSourceCategory(this.category)
 				.setSortBy(this.sortBy)
@@ -70,6 +70,11 @@ public class Controller {
 	public void analysis(NewsResponse newsResponse){
 
 		if(newsResponse != null){
+
+			authorWithShortestName = null;
+			numberOfArticles = 0;
+			titles = new ArrayList<>();
+			providers = new HashMap<>();
 
 			System.out.println("\nHier die Ergebnisse unserer hochentwickelten Analysesoftware: \n");
 
@@ -125,6 +130,11 @@ public class Controller {
 
 	public void downloadSequential(){
 		int count;
+
+
+		System.out.println(getURLs());
+
+
 		try{
 			count = sequDownloader.process(getURLs());
 			System.out.println(count + " Aritkel wurden in " + sequDownloader.getDownloadTime() + " Nanosekunden heruntergeladen.");
@@ -140,6 +150,11 @@ public class Controller {
 	private ParallelDownloader parallelDownloader = new ParallelDownloader();
 	public void downloadThreaded(){
 		int count;
+
+
+		System.out.println(getURLs());
+
+
 		try{
 			count = parallelDownloader.process(getURLs());
 			System.out.println(count + " Aritkel wurden in " + parallelDownloader.getDownloadTime() + " Nanosekunden heruntergeladen.");

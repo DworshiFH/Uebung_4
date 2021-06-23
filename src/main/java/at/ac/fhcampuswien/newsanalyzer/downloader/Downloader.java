@@ -17,6 +17,11 @@ public abstract class Downloader {
     public abstract int process(List<String> urls) throws DownloaderException, ExecutionException, InterruptedException;
 
     public String saveUrl2File(String urlString) throws DownloaderException {
+
+
+        System.out.println(urlString);
+
+
         InputStream is = null;
         OutputStream os = null;
         String fileName = "";
@@ -36,14 +41,16 @@ public abstract class Downloader {
                 os.write(b, 0, length);
             }
         } catch (IOException e) {
+            e.printStackTrace();
             throw new DownloaderException("Error in Class Downloader, method saveUrl2File!\n" + e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             throw new DownloaderException("Error in Class Downloader, method saveUrl2File, second catch!\n" + e.getMessage());
         } finally {
             try {
                 Objects.requireNonNull(is).close();
                 Objects.requireNonNull(os).close();
-            } catch (IOException e) {
+            } catch (IOException | NullPointerException e) {
                 System.out.println("Error in Class Downloader, method saveUrl2File, finally block!");
                 e.printStackTrace();
             }

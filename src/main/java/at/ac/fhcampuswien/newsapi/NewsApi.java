@@ -137,6 +137,7 @@ public class NewsApi {
             }
             in.close();
         } catch (IOException e) {
+            e.printStackTrace();
             throw new NewsApiException("IOException in Class NewsApi, method requestData(), \n\n" + e.getMessage());
         }
         return response.toString();
