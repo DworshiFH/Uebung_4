@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.newsanalyzer.downloader;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -23,8 +24,8 @@ public class ParallelDownloader extends Downloader{
                     future = pool.submit( () -> saveUrl2File(url));
                     if(future.get() != null) count++;
                 }
-            }catch(NullPointerException e){
-                System.out.println(e.getMessage());;
+            }catch(NullPointerException | InterruptedException e){
+                System.out.println(e.getMessage());
             }
         }
         long end = System.nanoTime();

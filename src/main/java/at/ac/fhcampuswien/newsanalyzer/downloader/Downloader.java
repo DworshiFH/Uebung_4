@@ -18,10 +18,6 @@ public abstract class Downloader {
 
     public String saveUrl2File(String urlString) throws DownloaderException {
 
-
-        System.out.println(urlString);
-
-
         InputStream is = null;
         OutputStream os = null;
         String fileName = "";

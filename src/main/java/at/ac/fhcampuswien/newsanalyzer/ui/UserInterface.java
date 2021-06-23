@@ -51,7 +51,7 @@ public class UserInterface {
 			articles.stream().forEach(article -> System.out.println(article.toString()));
 		}
 
-		ctrl.analysis(newsResponse);
+		//ctrl.analysis(newsResponse);
 	}
 
 	public void getDataFromCtrl3(){
@@ -68,7 +68,7 @@ public class UserInterface {
 			articles.stream().forEach(article -> System.out.println(article.toString()));
 		}
 
-		ctrl.analysis(newsResponse);
+		//ctrl.analysis(newsResponse);
 	}
 
 	public void getDataForCustomInput() {
